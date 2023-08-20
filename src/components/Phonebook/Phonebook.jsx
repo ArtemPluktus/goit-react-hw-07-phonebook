@@ -3,18 +3,24 @@ import { useSelector, useDispatch } from 'react-redux';
 import css from './Phonebook.module.css';
 import { ContactForm } from './ContactForm.jsx';
 import { Filter } from './Filter.jsx';
-import { ContactList } from './ContactList';
-
-import { saveContacts, deleteContacts } from '../../redux/contactsSlice.js';
+import { ContactList } from './ContactList.jsx';
 import { listFilter } from '../../redux/filterSlice.js';
+import {
+  useFetchContactsQuery,
+  useCreateContactMutation,
+  useDeleteContactMutation,
+} from '../../redux/contactsSlice.js';
 
 export function Phonebook() {
   const [name, setName] = useState(``);
   const [number, setNumber] = useState(``);
 
+  const { data } = useFetchContactsQuery();
+  const [deleteContact] = useDeleteContactMutation();
+  const [createContact] = useCreateContactMutation();
+
   const dispatch = useDispatch();
 
-  const contactsList = useSelector(state => state.contacts);
   const myFilter = useSelector(state => state.filter);
 
   const handleInputNameChange = e => {
@@ -28,25 +34,25 @@ export function Phonebook() {
   const saveContact = e => {
     e.preventDefault();
 
-    for (let el of contactsList) {
+    for (let el of data) {
       if (el.name === name) {
         return alert(`${name} is already in contacts`);
       }
     }
 
-    dispatch(saveContacts({ name, number }));
+    createContact({ name, number });
 
     setName('');
     setNumber('');
   };
 
-  const handleDeleteContact = name => {
-    dispatch(deleteContacts(name));
-  };
-
   const filteredList = () => {
+    if (!data) {
+      return [];
+    }
+
     const normalizedFilter = myFilter.toLowerCase();
-    return contactsList.filter(
+    return data.filter(
       contact =>
         contact.name.toLowerCase().includes(normalizedFilter) ||
         contact.number.toLowerCase().includes(normalizedFilter)
@@ -72,7 +78,7 @@ export function Phonebook() {
 
       <ContactList
         filteredContacts={filteredList()}
-        deleteContact={handleDeleteContact}
+        deleteContact={deleteContact}
       />
     </div>
   );

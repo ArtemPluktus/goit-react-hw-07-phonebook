@@ -5,12 +5,12 @@ export const ContactList = ({ filteredContacts, deleteContact }) => {
   return (
     <ul className={css.list}>
       {filteredContacts.map(contact => (
-        <li key={contact.name}>
+        <li key={contact.id}>
           {contact.name}:&nbsp;{contact.number}
           <button
             type="button"
             className={css.btnDelete}
-            onClick={() => deleteContact(contact.name)}
+            onClick={() => deleteContact(contact.id)}
           >
             Delete
           </button>
